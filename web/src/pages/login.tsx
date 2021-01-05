@@ -29,7 +29,12 @@ const login: React.FC<registerProps> = ({ }) => {
                         setErrors(toErrorMap(response.data.login.errors))
                     } else if (response.data?.login.user) {
                         console.log(response)
-                        router.push("/");
+                        if(typeof router.query.next === 'string'){
+                            router.push(router.query.next);
+                        }else{
+                            router.push( "/");
+                        }
+                      
                     }
                     // setTimeout(() => {
                     //   alert(JSON.stringify(values, null, 2))

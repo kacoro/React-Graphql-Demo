@@ -2,7 +2,7 @@
 
 this demo dependencies:
 >express
->mikro-orm 
+>typeorm 
 >apollo-server
 >graphql
 >redis

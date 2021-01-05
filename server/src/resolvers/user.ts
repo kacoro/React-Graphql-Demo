@@ -32,7 +32,7 @@ export class UserResolver {
     async changePassword(
         @Arg('token') token: string,
         @Arg('newpassword') newpassword: string,
-        @Ctx() { em, redis,req }: MyContext
+        @Ctx() { redis, req }: MyContext
     ): Promise<UserResponse> {
         if (newpassword.length <= 3) {
             return {
@@ -41,7 +41,6 @@ export class UserResolver {
                     message: "length must be greater than 3"
                 }]
             }
-
         }
 
         const key = FOGET_PASSWORD_PREFIX + token
@@ -54,7 +53,8 @@ export class UserResolver {
                 }]
             }
         }
-        const user = await em.findOne(User, { id: parseInt(userId) });
+        const userIdNum = parseInt(userId)
+        const user = await User.findOne({ id: userIdNum });
         if (!user) {
             return {
                 errors: [{
@@ -63,11 +63,11 @@ export class UserResolver {
                 }]
             }
         }
-        user.password =  await argon2.hash(newpassword);
-        await em.persistAndFlush(user)
+        User.update({ id: userIdNum }, { password: await argon2.hash(newpassword) })
+
         await redis.del(key)
         req.session.userId = user.id
-        return {user}
+        return { user }
 
     }
 
@@ -75,12 +75,12 @@ export class UserResolver {
     @Mutation(() => Boolean)
     async forgotPassword(
         @Arg('email') email: string,
-        @Ctx() { em, redis }: MyContext
+        @Ctx() { redis }: MyContext
     ) {
-        if(!email.includes('@')){
+        if (!email.includes('@')) {
             return false;
-       }
-        const user = await em.findOne(User, { email });
+        }
+        const user = await User.findOne({ where: { email } });
         if (!user) {
             //the email is not in the db
             return false;
@@ -97,19 +97,18 @@ export class UserResolver {
 
     @Query(() => User, { nullable: true })
     async me(
-        @Ctx() { req, em }: MyContext
+        @Ctx() { req }: MyContext
     ) {
         if (!req.session.userId) {
             return null
         }
-        const user = await em.findOne(User, { id: req.session.userId })
-        return user;
+        return await User.findOne(req.session.userId)
     }
 
     @Mutation(() => UserResponse)
     async register(
         @Arg('options') options: UsernamePasswordInput,
-        @Ctx() { em }: MyContext
+
     ): Promise<UserResponse> {
         const errors = validateRegister(options)
         if (errors) {
@@ -118,11 +117,19 @@ export class UserResolver {
         const hashedPassword = await argon2.hash(options.password)
 
         try {
-            const user = em.create(User, { username: options.username, email: options.email, password: hashedPassword })
-            await em.persistAndFlush(user)
+            const user = await User.create({
+                username: options.username,
+                email:options.email,
+                password:hashedPassword
+            }).save()
+            // const user = new User();
+            // user.username = options.username;
+            // user.email = options.email;
+            // user.password = hashedPassword;
+            // await user.save();
+
             return { user };
         } catch (error) {
-            console.dir(error)
             let message = "error.code:" + error.code
             let field = ""
             if (error.code === 'ER_DUP_ENTRY') {
@@ -147,12 +154,14 @@ export class UserResolver {
     async login(
         @Arg('usernameOrEmail') usernameOrEmail: string,
         @Arg('password') password: string,
-        @Ctx() { em, req }: MyContext
+        @Ctx() { req }: MyContext
     ): Promise<UserResponse> {
-        const user = await em.findOne(User,
-            usernameOrEmail.includes('@') ?
+        const user = await User.findOne({
+            where: usernameOrEmail.includes('@') ?
                 { email: usernameOrEmail }
-                : { username: usernameOrEmail })
+                : { username: usernameOrEmail }
+        })
+
         if (!user) {
             return {
                 errors: [{
