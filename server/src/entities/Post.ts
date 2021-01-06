@@ -20,7 +20,7 @@ export class Post extends BaseEntity {
   title!: string;
 
   @Field()
-  @Column()
+  @Column({type:"longtext"})
   text!: string;
 
   @Field()

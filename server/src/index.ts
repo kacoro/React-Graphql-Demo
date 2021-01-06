@@ -17,7 +17,8 @@ import { createConnection } from 'typeorm'
 
 const main = async () => {
     await createConnection(typeormConfig)
-
+    // const conn = await createConnection(typeormConfig)
+    // await conn.runMigrations();
     const app = express();
    
     const RedisStroe = connectRedis(session)

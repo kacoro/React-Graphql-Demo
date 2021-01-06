@@ -9,6 +9,7 @@
 
 /dist
 
+/migrations/*
 
 # misc
 .DS_Store

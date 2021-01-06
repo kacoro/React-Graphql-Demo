@@ -9,6 +9,8 @@ graphql
 [graphql-codegen](https://github.com/dotansimha/graphql-code-generator)
 @urql/exchange-graphcache
 
+# some code
+[simplePagination](https://github.com/FormidableLabs/urql/blob/main/exchanges/graphcache/src/extras/simplePagination.ts)
 
 ## How to use
 
@@ -26,4 +28,6 @@ yarn build
 
 yarn start
 ```
+
+
 
