@@ -31,35 +31,65 @@ const cursorPagination = (): Resolver => {
       return undefined;
     }
     const fieldKey = `${fieldName}(${stringifyVariables(fieldArgs)})`
-    const isItInTheCache = cache.resolve(entityKey,fieldKey)
+    const isItInTheCache = cache.resolve(
+      cache.resolve(entityKey,fieldKey) as string,
+      "posts")
      info.partial = !isItInTheCache;
+     let hasMore = true;
     const results = [];
     fieldInfos.forEach(fi=>{
-      const data = cache.resolve(entityKey, fi.fieldKey) as string []
+      const key = cache.resolve(entityKey, fi.fieldKey) as string;
+      const data = cache.resolve(key,'posts')as string[];
+      const _hasMore = cache.resolve(key,'hasMore')
+      if(!_hasMore){
+        hasMore = _hasMore as boolean
+      }
       console.log("data",data)
       results.push(...data)
     })
-    return results
+
+    return {
+      __typename:"PaginatedPosts",
+      hasMore, //true/false
+      posts:results
+    }
   }
     
 };
 
 export const createUrqlClient = (ssrExchange: any) => ({
-  url: 'http://localhost:4000/graphql',
+  url: 'http://127.0.0.1:4000/graphql',
   fetchOptions: {
     credentials: "include" as const
   },
   exchanges: [
     dedupExchange,
     cacheExchange({
+      keys:{
+        PaginatedPosts:() => null
+      },
       resolvers: {
         Query: {
-          posts: cursorPagination(),
+             posts: cursorPagination(),
         },
       },
       updates: {
         Mutation: {
+          createPost:(_result, args, cache, info) => {
+            console.log("createPost")
+            console.log(cache.inspectFields("Query"))
+            cache.invalidate("Query","posts",{
+                limit:5 //keep the same 
+            })
+            console.log(cache.inspectFields("Query"))
+            console.log("end createPost")
+            // betterUpdateQuery<LogoutMutation, MeQuery>(cache, { query: MeDocument }, _result, (result, query) => ({
+            //   me: null
+            // }))
+
+          },
           logout: (_result, args, cache, info) => {
+            console.log("logout")
             // me query
             betterUpdateQuery<LogoutMutation, MeQuery>(cache, { query: MeDocument }, _result, (result, query) => ({
               me: null
@@ -67,6 +97,7 @@ export const createUrqlClient = (ssrExchange: any) => ({
 
           },
           login: (_result, args, cache, info) => {
+            console.log("login")
             // cache.updateQuery({query:MeDocument},(data:MeQuery)=>{})
             betterUpdateQuery<LoginMutation, MeQuery>(cache, { query: MeDocument }, _result, (result, query) => {
               if (result.login.errors) {

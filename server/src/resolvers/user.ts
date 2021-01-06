@@ -1,6 +1,6 @@
 
 import { MyContext } from "../types";
-import { Resolver, Ctx, Arg, Mutation, Field, ObjectType, Query } from "type-graphql";
+import { Resolver, Ctx, Arg, Mutation, Field, ObjectType, Query, FieldResolver, Root } from "type-graphql";
 import { User } from "../entities/User";
 import argon2 from 'argon2'
 import { sendEmail } from "../utils/sendEmail";
@@ -8,6 +8,9 @@ import { UsernamePasswordInput } from "../types/UsernamePasswordInput";
 import { validateRegister } from "../utils/validateRegister";
 import { v4 } from 'uuid'
 import { FOGET_PASSWORD_PREFIX } from "../constants";
+
+
+
 @ObjectType()
 class FieldError {
     @Field()
@@ -26,8 +29,18 @@ class UserResponse {
     user?: User;
 }
 
-@Resolver()
+@Resolver(User)
 export class UserResolver {
+    @FieldResolver(() => String)
+    email(@Root() user: User, @Ctx() { req }: MyContext) {
+        if (req.session.userId === user.id) {//this is the current user and its ok to show them their own email
+            return user.email;
+        }
+        // current user wants to see someone else email
+        return "";
+
+    }
+
     @Mutation(() => UserResponse)
     async changePassword(
         @Arg('token') token: string,
@@ -108,7 +121,7 @@ export class UserResolver {
     @Mutation(() => UserResponse)
     async register(
         @Arg('options') options: UsernamePasswordInput,
-
+        @Ctx() { req }: MyContext
     ): Promise<UserResponse> {
         const errors = validateRegister(options)
         if (errors) {
@@ -119,15 +132,15 @@ export class UserResolver {
         try {
             const user = await User.create({
                 username: options.username,
-                email:options.email,
-                password:hashedPassword
+                email: options.email,
+                password: hashedPassword
             }).save()
             // const user = new User();
             // user.username = options.username;
             // user.email = options.email;
             // user.password = hashedPassword;
             // await user.save();
-
+            req.session.userId = user.id;
             return { user };
         } catch (error) {
             let message = "error.code:" + error.code
