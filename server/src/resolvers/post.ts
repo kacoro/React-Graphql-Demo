@@ -80,7 +80,7 @@ export class PostResolver {
         .innerJoinAndSelect("p.creator","u",'u.id = p.creatorId')
         .orderBy("p.createdAt","DESC").take(realLimitPlusOne)
         if(cursor){
-            qb.where("`p.createdAt` < :cursor",{
+            qb.where("p.createdAt < :cursor",{
                 cursor:new Date(parseInt(cursor))
             })
         }
