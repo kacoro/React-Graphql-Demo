@@ -14,7 +14,9 @@
     "@emotion/styled": "^11.0.0",
     "@urql/exchange-graphcache": "^3.3.3",
     "formik": "^2.2.6",
+    "framer-motion": "^3.1.4",
     "graphql": "^15.4.0",
+    "graphql-tag": "^2.11.0",
     "isomorphic-unfetch": "^3.1.0",
     "next": "latest",
     "next-urql": "^2.1.1",
@@ -22,8 +24,7 @@
     "react-dom": "^16.8.0",
     "react-is": "^16.8.0",
     "urql": "^1.11.4",
-    "wonka": "^4.0.15",
-    "framer-motion": "^3.1.4"
+    "wonka": "^4.0.15"
   },
   "license": "MIT",
   "devDependencies": {
