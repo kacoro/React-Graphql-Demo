@@ -31,18 +31,33 @@ export class PostResolver {
     ) {
         return root.text.slice(0, 50)
     }
-    @FieldResolver(() => Int, { nullable: true })
-    voteStatus(
-        @Root() root: Post
+
+    @FieldResolver(() => String)
+    creator(
+        @Root() post: Post,
+        @Ctx() {loaders}:MyContext
     ) {
-        console.log(root.updoots)
-        // root.updoots
-        if (root.updoots) {
-            return root.updoots[0]?.value
-        } else {
+        // return User.findOne(post.creatorId)
+       return loaders.UserLoader.load(post.creatorId)
+    }    
+
+    @FieldResolver(() => Int, { nullable: true })
+    async voteStatus(
+        @Root() root: Post,
+        @Ctx() {loaders,req}:MyContext
+    ) {
+        // console.log(root.updoots)
+        // // root.updoots
+        // if (root.updoots) {
+        //     return root.updoots[0]?.value
+        // } else {
+        //     return null
+        // }
+        if(!req.session.userId){
             return null
         }
-
+        const updoot = await loaders.UpdootLoader.load({postId:root.id,userId:req.session.userId})
+        return updoot ?updoot.value:null
     }
 
     @Mutation(() => Int)
@@ -102,11 +117,11 @@ export class PostResolver {
 
 
         const qb = getConnection().getRepository(Post).createQueryBuilder("p")
-            .innerJoinAndSelect("p.creator", "u", 'u.id = p.creatorId')
+            // .innerJoinAndSelect("p.creator", "u", 'u.id = p.creatorId')
             .orderBy("p.createdAt", "DESC").take(realLimitPlusOne)
-        if (req.session.userId) {
-            qb.leftJoinAndSelect("p.updoots", "up", 'up.postId = p.id and userId =' + req.session.userId)
-        }
+        // if (req.session.userId) {
+        //     qb.leftJoinAndSelect("p.updoots", "up", 'up.postId = p.id and userId =' + req.session.userId)
+        // }
 
         if (cursor) {
             qb.where("p.createdAt < :cursor", {
@@ -122,7 +137,8 @@ export class PostResolver {
     post(
         @Arg('id', () => Int) id: number,
     ): Promise<Post | undefined> {
-        return Post.findOne(id, { relations: ["creator"] });
+        // return Post.findOne(id, { relations: ["creator"] });
+        return Post.findOne(id);
     }
 
     @Mutation(() => Post)

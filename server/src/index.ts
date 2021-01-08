@@ -14,7 +14,7 @@ import connectRedis from 'connect-redis'
 import { MyContext } from "./types";
 import cors from 'cors'
 import { createConnection } from 'typeorm'
-
+import entitieLoaders from './utils/entitieLoaders'
 const main = async () => {
     await createConnection(typeormConfig)
     // const conn = await createConnection(typeormConfig)
@@ -52,7 +52,7 @@ const main = async () => {
             resolvers: [HelloResolver, PostResolver, UserResolver],
             validate: false
         }),
-        context: ({ req, res }): MyContext => ({ req, res, redis })
+        context: ({ req, res }): MyContext => ({ req, res, redis,loaders:entitieLoaders })
     })
 
     apolloServer.applyMiddleware({
