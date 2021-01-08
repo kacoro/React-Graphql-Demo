@@ -91,3 +91,22 @@ conn.runMigrations()
                 order by p.createAt DESC
                 limit ${realLimitPlusOne}
 ```
+
+```
+  const result = await getConnection()
+      .createQueryBuilder()
+      .update(Post)
+      .set({ title, text })
+      .where('id = :id and creatorId = :creatorId', {
+        id,
+        creatorId: req.session.userId,
+      })
+      .returning("*") //only pq
+      .execute();
+      
+      console.log("result:",result)
+    return result.raw[0];
+```
+
+
+

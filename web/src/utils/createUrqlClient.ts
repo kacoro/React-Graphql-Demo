@@ -1,17 +1,17 @@
 import { dedupExchange, fetchExchange, Exchange, stringifyVariables } from 'urql';
 import { cacheExchange,Resolver } from '@urql/exchange-graphcache';
-import { LoginMutation, LogoutMutation, MeDocument, MeQuery, RegisterMutation, VoteMutationVariables } from '../generated/graphql';
+import { DeletePostMutationVariables, LoginMutation, LogoutMutation, MeDocument, MeQuery, RegisterMutation, VoteMutationVariables } from '../generated/graphql';
 import { betterUpdateQuery } from './betterUpdateQuery';
 import { pipe, tap } from 'wonka';
 import Router from 'next/router';
 import gql from 'graphql-tag';
+import { isServer } from './isServer';
 
 
 const errorExchange: Exchange = ({ forward }) => (ops$) => {
   return pipe(
     forward(ops$),
     tap(({ error }) => {
-      console.log(error)
       if (error?.message.includes("not authenticated")) {
         Router.replace("/login");
       }
@@ -25,7 +25,7 @@ const cursorPagination = (): Resolver => {
     const { parentKey: entityKey, fieldName } = info;
    
     const allFields = cache.inspectFields(entityKey);
-    console.log("allFields",allFields)
+    // console.log("allFields",allFields)
     const fieldInfos = allFields.filter(info => info.fieldName === fieldName);
     const size = fieldInfos.length;
     if (size === 0) {
@@ -45,7 +45,6 @@ const cursorPagination = (): Resolver => {
       if(!_hasMore){
         hasMore = _hasMore as boolean
       }
-      console.log("data",data)
       results.push(...data)
     })
 
@@ -58,10 +57,22 @@ const cursorPagination = (): Resolver => {
     
 };
 
-export const createUrqlClient = (ssrExchange: any) => ({
+export const createUrqlClient = (ssrExchange: any,ctx:any) => {
+
+  let cookie = "";
+  if (isServer()) {
+    cookie = ctx?.req?.headers?.cookie;
+  }
+ 
+  return {
   url: 'http://127.0.0.1:4000/graphql',
   fetchOptions: {
-    credentials: "include" as const
+    credentials: "include" as const,
+    headers: cookie
+    ? {
+        cookie,
+      }
+    : undefined,
   },
   exchanges: [
     dedupExchange,
@@ -76,6 +87,12 @@ export const createUrqlClient = (ssrExchange: any) => ({
       },
       updates: {
         Mutation: {
+          deletePost:(_result, args, cache, info)=>{
+            cache.invalidate({
+              __typename:"Post",
+              id:(args as DeletePostMutationVariables).id,
+            })
+          },
           vote:(_result, args, cache, info)=>{
              const {postId,value} = args as VoteMutationVariables
              const data = cache.readFragment(
@@ -104,20 +121,16 @@ export const createUrqlClient = (ssrExchange: any) => ({
              
           },
           createPost:(_result, args, cache, info) => {
-            console.log("createPost")
-            console.log(cache.inspectFields("Query"))
-            // cache.invalidate("Query","posts",{
-            //     limit:5 //keep the same 
-            // })
-           
+            // console.log("createPost")
+            // console.log(cache.inspectFields("Query"))
          
             const allFields = cache.inspectFields("Query");
             const fieldInfo = allFields.filter((info) =>info.fieldName ==='posts')
             fieldInfo.forEach((fi)=>{
               cache.invalidate("Query","posts",fi.arguments)
             })
-            console.log(cache.inspectFields("Query"))
-            console.log("end createPost")
+            // console.log(cache.inspectFields("Query"))
+            // console.log("end createPost")
           },
           logout: (_result, args, cache, info) => {
             console.log("logout")
@@ -161,5 +174,5 @@ export const createUrqlClient = (ssrExchange: any) => ({
     
   ]
 
-
-})
+  }
+}
