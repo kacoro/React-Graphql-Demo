@@ -47,11 +47,10 @@ const EditPost: React.FC<editPostProps> = ({ }) => {
             <Formik
                 initialValues={{ title: data.post.title, text:  data.post.text }}
                 onSubmit={async (values, { setErrors }) => {
-                  
                     const { error } =  await updatePost({id:intId,...values})
                      console.log(error)
                     if (!error) {
-                        router.push("/");
+                        router.back()
                     }
                 }}
             >
