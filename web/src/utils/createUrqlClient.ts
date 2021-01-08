@@ -1,5 +1,5 @@
 import { dedupExchange, fetchExchange, Exchange, stringifyVariables } from 'urql';
-import { cacheExchange,Resolver } from '@urql/exchange-graphcache';
+import { cacheExchange,Resolver,Cache } from '@urql/exchange-graphcache';
 import { DeletePostMutationVariables, LoginMutation, LogoutMutation, MeDocument, MeQuery, RegisterMutation, VoteMutationVariables } from '../generated/graphql';
 import { betterUpdateQuery } from './betterUpdateQuery';
 import { pipe, tap } from 'wonka';
@@ -56,6 +56,14 @@ const cursorPagination = (): Resolver => {
   }
     
 };
+
+function invalidateAllPosts(cache:Cache){
+  const allFields = cache.inspectFields("Query");
+  const fieldInfo = allFields.filter((info) =>info.fieldName ==='posts')
+  fieldInfo.forEach((fi)=>{
+    cache.invalidate("Query","posts",fi.arguments)
+  })
+}
 
 export const createUrqlClient = (ssrExchange: any,ctx:any) => {
 
@@ -123,12 +131,8 @@ export const createUrqlClient = (ssrExchange: any,ctx:any) => {
           createPost:(_result, args, cache, info) => {
             // console.log("createPost")
             // console.log(cache.inspectFields("Query"))
-         
-            const allFields = cache.inspectFields("Query");
-            const fieldInfo = allFields.filter((info) =>info.fieldName ==='posts')
-            fieldInfo.forEach((fi)=>{
-              cache.invalidate("Query","posts",fi.arguments)
-            })
+            invalidateAllPosts(cache)
+           
             // console.log(cache.inspectFields("Query"))
             // console.log("end createPost")
           },
@@ -138,7 +142,7 @@ export const createUrqlClient = (ssrExchange: any,ctx:any) => {
             betterUpdateQuery<LogoutMutation, MeQuery>(cache, { query: MeDocument }, _result, (result, query) => ({
               me: null
             }))
-
+            invalidateAllPosts(cache)
           },
           login: (_result, args, cache, info) => {
             console.log("login")
@@ -152,6 +156,7 @@ export const createUrqlClient = (ssrExchange: any,ctx:any) => {
                 }
               }
             })
+            invalidateAllPosts(cache)
           },
           register: (_result, args, cache, info) => {
             // cache.updateQuery({query:MeDocument},(data:MeQuery)=>{})
