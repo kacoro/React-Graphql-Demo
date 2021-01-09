@@ -102,7 +102,7 @@ export class UserResolver {
         await redis.set(FOGET_PASSWORD_PREFIX + token, user.id, 'ex', 1000 * 60 * 60 * 24 * 3) //3 days
 
         sendEmail(email,
-            `<a href="http://localhost:3000/change-paasword/${token}">reset password</a>`
+            `<a href=${process.env.CORS_ORIGIN}"/change-paasword/${token}">reset password</a>`
         );
         return true;
     }
