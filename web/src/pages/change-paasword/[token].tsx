@@ -5,15 +5,14 @@ import InputField from '../../components/InputField';
 import Wrapper from '../../components/Wrapper';
 import { toErrorMap } from '../../utils/toErrorMap';
 import { Formik, Form,  } from 'formik'
-import { useChangePasswordMutation } from '../../generated/graphql';
-import { createUrqlClient } from '../../utils/createUrqlClient';
-import {withUrqlClient} from 'next-urql'
+import { MeDocument, MeQuery, useChangePasswordMutation } from '../../generated/graphql';
+import { withApollo } from '../../utils/withApollo';
 interface changePasswordProps {
    
 }
 
  const changePassword:React.FC<changePasswordProps> = () =>{
-    const [,changePassword] = useChangePasswordMutation()
+    const [changePassword] = useChangePasswordMutation()
     const [tokenError,setTokenError] = useState('');
     const router = useRouter()
     return (
@@ -23,7 +22,19 @@ interface changePasswordProps {
                 onSubmit={async (values, { setErrors }) => {
                     console.log(router)
                    
-                    const response = await changePassword({newpassword:values.newpassword,token:router.query.token as string});
+                    const response = await changePassword({
+                        variables:{newpassword:values.newpassword,token:router.query.token as string},
+                        update: (cache, {data}) => {
+                            cache.writeQuery<MeQuery>({
+                                query:MeDocument,
+                                data:{
+                                    __typename:"Query",
+                                    me:data?.changePassword.user
+                                }
+                            })
+                            //cache.evict({fieldName:'posts:{}'})
+                        }
+                    });
                     if (response.data?.changePassword.errors) {
                         const errorMap = toErrorMap(response.data.changePassword.errors)
                         if('token' in errorMap){
@@ -51,9 +62,4 @@ interface changePasswordProps {
     );
 }
 
-// changePassword.getInitialProps = ({query}) =>{
-//     return {
-//         token:query.token as string
-//     }
-// }
-export default  withUrqlClient(createUrqlClient)(changePassword);
+export default withApollo({ ssr: false })(changePassword);

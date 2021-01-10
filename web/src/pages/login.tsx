@@ -4,17 +4,18 @@ import { Formik, Form,  } from 'formik'
 import Wrapper from '../components/Wrapper';
 import InputField from '../components/InputField';
 import NextLink from 'next/link'
-import { useLoginMutation } from '../generated/graphql'
+import { MeDocument, MeQuery, useLoginMutation } from '../generated/graphql'
 import { toErrorMap } from '../utils/toErrorMap';
 import { useRouter } from 'next/router'
 import { createUrqlClient } from '../utils/createUrqlClient';
 import {withUrqlClient} from 'next-urql'
+import { withApollo } from '../utils/withApollo';
 interface registerProps {
 
 }
 
 const login: React.FC<registerProps> = ({ }) => {
-    const [, login] = useLoginMutation()
+    const [login] = useLoginMutation()
     const router = useRouter()
 
     return (
@@ -24,7 +25,17 @@ const login: React.FC<registerProps> = ({ }) => {
                 onSubmit={async (values, { setErrors }) => {
                     console.log(router)
                    
-                    const response = await login(values);
+                    const response = await login({variables: values,
+                        update: (cache, {data}) => {
+                            cache.writeQuery<MeQuery>({
+                                query:MeDocument,
+                                data:{
+                                    __typename:"Query",
+                                    me:data?.login.user
+                                }
+                            })
+                            cache.evict({fieldName:'posts:{}'})
+                        }});
                     if (response.data?.login.errors) {
                         setErrors(toErrorMap(response.data.login.errors))
                     } else if (response.data?.login.user) {
@@ -63,4 +74,4 @@ const login: React.FC<registerProps> = ({ }) => {
             </Formik></Wrapper>
     );
 }
-export default withUrqlClient(createUrqlClient)(login);
+export default withApollo({ ssr: false })(login);

@@ -1,20 +1,18 @@
 import { useRouter } from 'next/router';
 import React from 'react'
 import Layout from '../../components/Layout';
-import { usePostQuery } from '../../generated/graphql';
-import { createUrqlClient } from '../../utils/createUrqlClient';
-import { withUrqlClient } from 'next-urql'
 import { Box, Heading } from '@chakra-ui/react';
 import { useGetPostFromUrl } from '../../utils/useGetPostFromUrl';
 import EditDeletePostButtons from '../../components/EditDeletePostButtons';
+import { withApollo } from '../../utils/withApollo';
 interface postProps {
 
 }
 
 const Post: React.FC<postProps> = ({ }) => {
     const router = useRouter()
-    const [{ data,error, fetching }] = useGetPostFromUrl()
-    if(fetching){
+    const { data,error,loading } = useGetPostFromUrl()
+    if(loading){
         <Layout>
         <div>loading...</div>
          </Layout>
@@ -40,4 +38,5 @@ const Post: React.FC<postProps> = ({ }) => {
         </Layout>
     );
 }
-export default withUrqlClient(createUrqlClient, { ssr: true })(Post);
+
+export default withApollo({ ssr: true })(Post);

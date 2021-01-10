@@ -10,6 +10,7 @@ import { toErrorMap } from '../utils/toErrorMap';
 import login from './login';
 import { useRouter } from 'next/router';
 import { useForgotPasswordMutation } from '../generated/graphql';
+import { withApollo } from '../utils/withApollo';
 
 interface forgotPasswordProps{
 
@@ -17,14 +18,14 @@ interface forgotPasswordProps{
 
  const forgotPassword: React.FC<forgotPasswordProps> = ({}) =>{
         const [complete,setComplete] = useState(false);
-        const [, forgotPassword] = useForgotPasswordMutation()
+        const [forgotPassword] = useForgotPasswordMutation()
         const router = useRouter()
         return (
             <Wrapper variant="small">
             <Formik
                 initialValues={{ email: "" }}
                 onSubmit={async (values, { setErrors }) => {
-                    const response = await forgotPassword(values);
+                    const response = await forgotPassword({variables:values});
                     if(response.data.forgotPassword){
                         setComplete(true)
                     }else{
@@ -48,4 +49,4 @@ interface forgotPasswordProps{
         );
 }
 
-export default withUrqlClient(createUrqlClient)(forgotPassword)
+export default withApollo({ ssr: false })(forgotPassword);
