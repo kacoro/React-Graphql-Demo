@@ -1,5 +1,4 @@
-import { Box, Flex, IconButton } from '@chakra-ui/react'
-import { ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons'
+import { Box, Flex, IconButton } from '@chakra-ui/core'
 import React, { useState } from 'react'
 import { PostSnippetFragment, useVoteMutation, VoteMutation } from '../generated/graphql';
 import gql from 'graphql-tag';
@@ -46,9 +45,9 @@ const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
     const [vote] = useVoteMutation()
     return (
         <Flex direction="column" justifyContent="content" alignItems="center" pr={5}>
-            <IconButton icon={<ChevronUpIcon />} aria-label="updoot post"
+            <IconButton icon="chevron-up" aria-label="updoot post"
                 isLoading={loadingState === 'updoot-loading'}
-                colorScheme={post.voteStatus === 1 ? "green" : undefined}
+                color={post.voteStatus === 1 ? "green" : undefined}
                 onClick={async () => {
                     if (post.voteStatus === 1) {
                         return;
@@ -63,8 +62,8 @@ const UpdootSection: React.FC<UpdootSectionProps> = ({ post }) => {
                     setLoadingState('not-loading')
                 }} />
             <Box>{post.points}</Box>
-            <IconButton icon={<ChevronDownIcon />} aria-label="updoot post"
-                colorScheme={post.voteStatus === -1 ? "red" : undefined}
+            <IconButton icon="chevron-down" aria-label="updoot post"
+                color={post.voteStatus === -1 ? "red" : undefined}
                 isLoading={loadingState === 'downdoot-loading'}
                 onClick={async () => {
                     if (post.voteStatus === -1) {

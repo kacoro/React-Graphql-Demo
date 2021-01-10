@@ -1,21 +1,20 @@
 import {InputHTMLAttributes} from 'react'
-import { FormControl, FormLabel, Input, FormErrorMessage, Textarea, ComponentWithAs, InputProps, TextareaProps } from '@chakra-ui/react';
+import { FormControl, FormLabel, Input, FormErrorMessage, Textarea} from '@chakra-ui/core';
 import React from 'react'
-import {Formik,Form,Field,useField} from 'formik'
+import {useField} from 'formik'
 
 
-type InputFieldProps = InputHTMLAttributes<HTMLInputElement> &{
-    name:string;
-    label:string;
-    textare?:boolean 
-};
+type InputFieldProps = InputHTMLAttributes<HTMLInputElement> & {
+    label: string;
+    name: string;
+    textarea?: boolean;
+  };
 
-type InputType = ComponentWithAs<"input", InputProps>|ComponentWithAs<"textarea", TextareaProps>
 
- const InputField: React.FC<InputFieldProps> = ({label,textare,size: _,...props}) =>{
-         let InputOrTextare:InputType = Input;
-         if(textare){
-             (InputOrTextare as InputType) = Textarea 
+ const InputField: React.FC<InputFieldProps> = ({label,textarea,size: _,...props}) =>{
+         let InputOrTextare = Input;
+         if(textarea){
+             InputOrTextare = Textarea 
          }
         const [field,{error}] = useField(props);
         return (

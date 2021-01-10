@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Link } from '@chakra-ui/react';
+import { Box, Button, Flex, Link } from '@chakra-ui/core';
 import React from 'react'
 import { Formik, Form,  } from 'formik'
 import Wrapper from '../components/Wrapper';
@@ -7,8 +7,6 @@ import NextLink from 'next/link'
 import { MeDocument, MeQuery, useLoginMutation } from '../generated/graphql'
 import { toErrorMap } from '../utils/toErrorMap';
 import { useRouter } from 'next/router'
-import { createUrqlClient } from '../utils/createUrqlClient';
-import {withUrqlClient} from 'next-urql'
 import { withApollo } from '../utils/withApollo';
 interface registerProps {
 
@@ -62,7 +60,7 @@ const login: React.FC<registerProps> = ({ }) => {
                         <Flex mt={4}>
                         <Button
                             
-                            colorScheme="teal"
+                            color="teal"
                             isLoading={props.isSubmitting}
                             type="submit"
                         >Login</Button>

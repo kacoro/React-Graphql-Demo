@@ -1,13 +1,8 @@
 import React, { useState } from 'react'
-import { createUrqlClient } from '../utils/createUrqlClient';
-import {withUrqlClient} from 'next-urql'
 import { Formik, Form,  } from 'formik'
-import { Box, Flex, Button, Link } from '@chakra-ui/react';
-import router from 'next/dist/next-server/server/router';
+import { Box,  Button } from '@chakra-ui/core';
 import InputField from '../components/InputField';
 import Wrapper from '../components/Wrapper';
-import { toErrorMap } from '../utils/toErrorMap';
-import login from './login';
 import { useRouter } from 'next/router';
 import { useForgotPasswordMutation } from '../generated/graphql';
 import { withApollo } from '../utils/withApollo';
@@ -39,7 +34,7 @@ interface forgotPasswordProps{
                         <InputField name='email' placeholder="email" label="email" />
                         
                         <Button mt="4"
-                            colorScheme="teal"
+                            color="teal"
                             isLoading={isSubmitting}
                             type="submit"
                         >forgot password</Button>

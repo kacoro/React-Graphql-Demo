@@ -1,9 +1,9 @@
 
-import React, { useState } from 'react'
-import { PostQuery, PostsQuery, useDeletePostMutation, useMeQuery, usePostsQuery } from '../generated/graphql';
+import React from 'react'
+import {  usePostsQuery } from '../generated/graphql';
 import Layout from '../components/Layout';
 import UpdootSection from '../components/UpdootSection'
-import { Box, Button, Flex, Heading, IconButton, Link, Stack, Text } from '@chakra-ui/react';
+import { Box, Button, Flex, Heading,  Link, Stack, Text } from '@chakra-ui/core';
 import NextLink from 'next/link'
 import EditDeletePostButtons from '../components/EditDeletePostButtons';
 import { withApollo } from '../utils/withApollo';

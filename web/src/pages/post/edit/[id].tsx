@@ -2,13 +2,10 @@ import { useRouter } from 'next/router';
 import React from 'react'
 import Layout from '../../../components/Layout';
 import { usePostQuery, useUpdatePostMutation } from '../../../generated/graphql';
-import { createUrqlClient } from '../../../utils/createUrqlClient';
-import { withUrqlClient } from 'next-urql'
-import { Box, Heading ,Flex,Button} from '@chakra-ui/react';
+import { Box, Flex,Button} from '@chakra-ui/core';
 import { Formik, Form } from 'formik';
 import InputField from '../../../components/InputField';
 import { useIsAuth } from '../../../utils/useIsAuth';
-import { useGetPostFromUrl } from '../../../utils/useGetPostFromUrl';
 import { useGetIntId } from '../../../utils/useGetIntId';
 import { withApollo } from '../../../utils/withApollo';
 interface editPostProps {
@@ -59,11 +56,11 @@ const EditPost: React.FC<editPostProps> = ({ }) => {
                     <Form>
                         <InputField name='title' placeholder="title" label="title" />
                         <Box mt={4}>
-                            <InputField textare name='text' placeholder="text..." label="text" type="text" />
+                            <InputField textarea name='text' placeholder="text..." label="text" type="text" />
                         </Box>
                         <Flex mt={4}>
                             <Button
-                                colorScheme="teal"
+                                color="teal"
                                 isLoading={props.isSubmitting}
                                 type="submit"
                             >Update Post</Button>

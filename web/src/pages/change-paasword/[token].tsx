@@ -1,4 +1,4 @@
-import { Box, Button } from '@chakra-ui/react';
+import { Box, Button } from '@chakra-ui/core';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react'
 import InputField from '../../components/InputField';
@@ -52,7 +52,7 @@ interface changePasswordProps {
                         {tokenError?<Box color="red.500">{tokenError}</Box>:null}
                         <Button
                             mt={4}
-                            colorScheme="teal"
+                            color="teal"
                             isLoading={props.isSubmitting}
                             type="submit"
                         >Reset Password</Button>

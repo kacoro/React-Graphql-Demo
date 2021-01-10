@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import React from 'react'
 import Layout from '../../components/Layout';
-import { Box, Heading } from '@chakra-ui/react';
+import { Box, Heading } from '@chakra-ui/core';
 import { useGetPostFromUrl } from '../../utils/useGetPostFromUrl';
 import EditDeletePostButtons from '../../components/EditDeletePostButtons';
 import { withApollo } from '../../utils/withApollo';

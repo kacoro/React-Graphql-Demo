@@ -17,3 +17,4 @@ npx gen-env-types .env -o src/types/env.d.ts -e .
 ```
 npx typeorm migration:generate -n Initial
 ```
+

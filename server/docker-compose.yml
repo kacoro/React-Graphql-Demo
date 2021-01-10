@@ -49,7 +49,6 @@ services:
       app_net:
         ipv4_address: 172.16.238.9
 
-
 networks:
   app_net:
     ipam:

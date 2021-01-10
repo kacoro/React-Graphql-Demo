@@ -28,4 +28,8 @@ yarn build
 yarn start
 ```
 
-## graphql
+## How to deploy
+
+```
+docker-compose up -d --build
+```
