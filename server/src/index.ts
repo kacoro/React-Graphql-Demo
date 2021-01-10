@@ -33,7 +33,7 @@ const main = async () => {
     app.use(
         session({
             name: COOKIE_NAME,
-            store: new RedisStroe({ client: redis, disableTouch: true, disableTTL: true }),
+            store: new RedisStroe({ client: redis  as any, disableTouch: true, disableTTL: true }),
             secret: process.env.SESSION_SECRET || 'asdasd',
             cookie: {
                 maxAge: 1000 * 60 * 60 * 24 * 10,
