@@ -1,0 +1,59 @@
+version: '3'
+
+services:
+ 
+  db:
+    image: mysql:5.7
+    container_name: db
+    restart: unless-stopped
+    ports:
+      - "9906:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=test
+      - MYSQL_USER=test   #创建test用户
+      - MYSQL_PASSWORD=test  #设置test用户的密码
+      - TZ=Asia/Shanghai # 设置时区
+    volumes:
+      - ./mysql:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-authentication-plugin=mysql_native_password #这行代码解决无法访问的问题
+    networks:
+      app_net:
+        ipv4_address: 172.16.238.10
+
+  redis:
+    image: "redis:alpine"   
+    container_name: redis
+    restart: unless-stopped
+    ports:
+        - 9979:6379
+    networks:
+      app_net:
+        ipv4_address: 172.16.238.11
+        #ipv6_address: 2001:3984:3989::10
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # image: node:14-alpine
+    container_name: api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - redis
+    links: 
+      - db:mysql
+    networks:
+      app_net:
+        ipv4_address: 172.16.238.9
+
+
+networks:
+  app_net:
+    ipam:
+      driver: bridge
+      config:
+        - subnet: "172.16.238.0/24"
+        #- subnet: "2001:3984:3989::/64"
